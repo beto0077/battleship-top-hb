@@ -1,0 +1,39 @@
+{
+  "name": "battleship-top-hb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint .",
+    "format": "prettier . --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beto0077/battleship-top-hb.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/beto0077/battleship-top-hb/issues"
+  },
+  "homepage": "https://github.com/beto0077/battleship-top-hb#readme",
+  "devDependencies": {
+    "@babel/preset-env": "^7.29.2",
+    "@eslint/css": "^1.1.0",
+    "@eslint/js": "^10.0.1",
+    "css-loader": "^7.1.4",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
+    "html-loader": "^5.1.0",
+    "html-webpack-plugin": "^5.6.6",
+    "jest": "^30.3.0",
+    "prettier": "3.8.2",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.106.1",
+    "webpack-cli": "^7.0.2",
+    "webpack-dev-server": "^5.2.3"
+  }
+}
