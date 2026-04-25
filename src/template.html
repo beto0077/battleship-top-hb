@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Battleship TOP HB</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="logo">
+        <!-- <a href="https://github.com/beto0077"
+          ><img src="./assets/images/hb-logo-white.png" alt="Haakon Beck logo"
+        /></a> -->
+      </div>
+      <h1>Battleship TOP HB</h1>
+    </header>
+    <main class="game-container">
+      <div class="game-info">
+        <div class="player-info" data-player="1">
+          <div class="player-marker"></div>
+          <p class="player-name">Player 1</p>
+        </div>
+        <div class="player-info" data-player="2">
+          <div class="player-marker"></div>
+          <p class="player-name">Player 2</p>
+        </div>
+      </div>
+      <div class="game-panel">
+        <div class="grid-background" style="display: none">
+          <!-- <div class="board-grid">
+            <div class="board-cell" data-index="0"></div>
+            <div class="board-cell" data-index="1"></div>
+          </div> -->
+        </div>
+        <!-- <form action="" class="player-form" style="display: none">
+          <fieldset class="main-form-fieldset">
+            <legend class="form-title">Create new player:</legend>
+
+            <div>
+              <label for="player-name">Name:</label>
+              <input type="text" id="player-name" name="name" required />
+            </div>
+
+            <fieldset class="marker-choice">
+              <legend>Which marker do you want to use?</legend>
+              <div>
+                <input
+                  type="radio"
+                  id="cross-marker"
+                  name="marker"
+                  value="cross"
+                  required
+                />
+                <label for="cross-marker" class="marker-option">X</label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  id="random-marker"
+                  name="marker"
+                  value="random"
+                  required
+                  checked
+                />
+                <label for="random-marker" class="marker-option">Random</label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  id="circle-marker"
+                  name="marker"
+                  value="circle"
+                  required
+                />
+                <label for="circle-marker" class="marker-option">O</label>
+              </div>
+            </fieldset>
+            <button class="btn-style submit-button" type="submit">
+              Create Player
+            </button>
+          </fieldset>
+        </form> -->
+        <div class="game-message-screen">
+          <div class="message-container">
+            <div class="winner-marker"></div>
+            <p>
+              Welcome to this Battleship game developed by Haakon Beck, I hope
+              you have fun, press Start to start the game.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="game-control">
+        <button class="btn-style start-button" type="button">Start</button>
+        <button
+          class="btn-style restart-button"
+          type="button"
+          style="display: none"
+        >
+          Restart
+        </button>
+        <div class="game-stats" style="display: none">
+          <p>Rounds won by:</p>
+          <p class="player-stats" data-player="1"></p>
+          <p class="player-stats" data-player="2"></p>
+          <p class="game-ties"></p>
+        </div>
+        <!-- <div class="loader-container" style="display: none">
+          <div class="spinner"></div>
+        </div> -->
+      </div>
+    </main>
+    <footer class="site-footer">
+      <small>Copyright &copy; TOP - H. Beck Journey 2025</small>
+    </footer>
+  </body>
+</html>

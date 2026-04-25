@@ -1,8 +1,9 @@
-import { Ship } from "./Ship";
+import { Ship } from "./Ship.js";
 
 export class Gameboard {
   constructor() {
     this.fleetShips = [];
+    this.hits = [];
     this.missedAttacks = [];
   }
 
@@ -18,6 +19,7 @@ export class Gameboard {
 
     if (foundShip) {
       foundShip[0].hit();
+      this.hits.push(coordinates);
       return "hit";
     } else {
       this.missedAttacks.push(coordinates);
