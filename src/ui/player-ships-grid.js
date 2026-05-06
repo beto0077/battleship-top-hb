@@ -1,6 +1,9 @@
 export function createPlayerShipsGrid(gameboard, cellClickHandler) {
+  const boardContainer = document.createElement("div");
   const gridContainer = document.createElement("div");
+  boardContainer.classList.add("grid-background");
   gridContainer.classList.add("board-grid");
+
   for (let x = 0; x < 10; x++) {
     for (let y = 0; y < 10; y++) {
       const cell = document.createElement("div");
@@ -24,5 +27,8 @@ export function createPlayerShipsGrid(gameboard, cellClickHandler) {
       gridContainer.appendChild(cell);
     }
   }
-  return gridContainer;
+
+  boardContainer.appendChild(gridContainer);
+
+  return boardContainer;
 }
