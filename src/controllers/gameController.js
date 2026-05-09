@@ -1,30 +1,30 @@
 import { Player } from "../models/Player.js";
 import {
+  displayPlayerForm,
+  displayFleetCreator,
   displayPlayerShipsGrid,
   displayGameWinner,
+  bindOnFormSubmit,
   bindOnClickTemplate,
   bindOnClickAxis,
   bindOnClickCreatorCell,
+  binddblOnClickCreatorCell,
+  bindOnConfirmFleet,
   bindOnClickCell,
   bindOnRestart,
 } from "../display/gameDisplay.js";
+import { COMPUTER_NAMES } from "../initialState.js";
 
 let players = [];
-let playerTurn = true;
+let playerTurn = true; //true as player 1 and false as player 2 => Don't overthink it bro...
 let placementState = {
-  activeShip: null, // Stores the ship object currently selected (e.g., { name: 'Carrier', size: 5 })
-  isHorizontal: true, // Toggles false when they click your direction button
+  activeShip: null,
+  isHorizontal: true,
+  shipsDeployed: [],
 };
 
-//Test variables REMOVE LATER
-const testPlayer1 = { name: "Edward", type: "human" };
-const testPlayer2 = { name: "Jack", type: "human" };
-const testShip = { name: "Normandy", size: 1 };
-//Test variables REMOVE LATER
-
-function createPlayers(player1, player2) {
-  players.push(new Player(player1.name, player1.type));
-  players.push(new Player(player2.name, player2.type));
+function changePlayerTurn() {
+  playerTurn = !playerTurn;
 }
 
 function updateActiveShipState(shipModel) {
@@ -32,17 +32,59 @@ function updateActiveShipState(shipModel) {
   console.log(placementState);
 }
 
+function resetActiveShipState() {
+  placementState.activeShip = null;
+}
+
 function updateIsHorizontalState() {
   placementState.isHorizontal = !placementState.isHorizontal;
-  console.log(placementState);
+  showFleetPlacement();
+}
+
+function updateShipsDeployedState() {
+  const currentPlayer = playerTurn ? players[0] : players[1];
+  placementState.shipsDeployed = currentPlayer.gameboard.getShipsDeployed();
+}
+
+function resetPlacementState() {
+  placementState = {
+    activeShip: null,
+    isHorizontal: true,
+    shipsDeployed: [],
+  };
+}
+
+function showFleetPlacement() {
+  const currentPlayer = playerTurn ? players[0] : players[1];
+  updateShipsDeployedState();
+  displayFleetCreator(players, currentPlayer.gameboard, placementState);
+}
+
+function showPlayerGrid() {
+  const currentPlayer = playerTurn ? players[1] : players[0];
+  displayPlayerShipsGrid(players, currentPlayer.gameboard);
+}
+
+function processPlayerCreation(playerData, opponentType) {
+  if (players.length < 1) {
+    players.push(new Player(playerData.name, "human"));
+    if (opponentType === "computer") {
+      const computerName =
+        COMPUTER_NAMES[Math.floor(Math.random() * COMPUTER_NAMES.length)];
+      players.push(new Player(computerName, opponentType));
+      showFleetPlacement();
+    } else {
+      const isPlayer2Human = true;
+      displayPlayerForm(players, isPlayer2Human);
+    }
+  } else {
+    players.push(new Player(playerData.name, "human"));
+    showFleetPlacement();
+  }
 }
 
 function processShipPlacement(coords) {
   const currentPlayer = playerTurn ? players[0] : players[1];
-  // currentPlayer.gameboard.isPlacementValid();
-  console.log(
-    `${currentPlayer.name} is clicking on coords => ${coords[0]}-${coords[1]}`,
-  );
 
   if (!placementState.activeShip) {
     console.log("There is no ship selected bro...");
@@ -54,24 +96,37 @@ function processShipPlacement(coords) {
     coords,
     placementState.isHorizontal ? "horizontal" : "vertical",
   );
-  console.log(shipCoordinates);
   if (currentPlayer.gameboard.isPlacementValid(shipCoordinates)) {
     currentPlayer.gameboard.placeShip(
       placementState.activeShip,
       shipCoordinates,
     );
+    resetActiveShipState();
+    showFleetPlacement();
   }
 }
 
-function organizeShips() {
-  if (playerTurn) {
-    players[0].gameboard.placeShip(testShip, [[0, 0]]);
-    players[0].gameboard.placeShip(testShip, [[0, 2]]);
-    players[0].gameboard.placeShip(testShip, [[0, 4]]);
+function processShipRemoval(coords) {
+  const currentPlayer = playerTurn ? players[0] : players[1];
+  const shipFound = currentPlayer.gameboard.getShip(coords);
+  const shipModel = {
+    name: shipFound.name,
+    size: shipFound.length,
+  };
+  updateActiveShipState(shipModel);
+  currentPlayer.gameboard.removeShip(coords);
+  showFleetPlacement();
+}
+
+function processFleetConfirmation() {
+  const player1Fleet = players[0].gameboard.getShipsDeployed();
+  const player2Fleet = players[1].gameboard.getShipsDeployed();
+  const areFleetsComplete = player1Fleet.length === player2Fleet.length;
+  changePlayerTurn();
+  if (areFleetsComplete) {
+    showPlayerGrid();
   } else {
-    players[1].gameboard.placeShip(testShip, [[2, 0]]);
-    players[1].gameboard.placeShip(testShip, [[2, 2]]);
-    players[1].gameboard.placeShip(testShip, [[2, 4]]);
+    showFleetPlacement();
   }
 }
 
@@ -84,85 +139,40 @@ function checkGameboards() {
 }
 
 function playRound(coords) {
-  console.log(`Player ${playerTurn ? 1 : 2} turn =>`);
   const attackResult = playerTurn
     ? players[1].gameboard.receiveAttack(coords)
     : players[0].gameboard.receiveAttack(coords);
 
-  console.log(`Player ${playerTurn ? 1 : 2} => ${attackResult} => ${coords}`);
-
-  // let attackResult;
-  // if (playerTurn) {
-  //   attackResult = players[1].gameboard.receiveAttack(coords);
-  //   console.log(`Player 1 => ${attackResult} => ${coords}`);
-  // } else {
-  //   attackResult = players[0].gameboard.receiveAttack(coords);
-  //   console.log(`Player 2 => ${attackResult} => ${coords}`);
-  // }
   if (checkGameboards()) {
-    console.log(`The winner is ${playerTurn ? "Player1" : "Player2"}`);
-    displayGameWinner(playerTurn ? 0 : 1);
-    console.log(
-      `Missed hits for Player1 => ${players[1].gameboard.missedAttacks}`,
-    );
-    console.log(
-      `Missed hits for Player2 => ${players[0].gameboard.missedAttacks}`,
-    );
+    const winner = playerTurn ? players[0] : players[1];
+    const loserGameboard = playerTurn
+      ? players[1].gameboard
+      : players[0].gameboard;
+    displayGameWinner(players, winner, loserGameboard);
     return true;
   }
   if (attackResult == "hit") {
-    playerTurn
-      ? displayPlayerShipsGrid(players[1].gameboard)
-      : displayPlayerShipsGrid(players[0].gameboard);
+    showPlayerGrid();
   } else {
-    playerTurn = !playerTurn;
-    playerTurn
-      ? displayPlayerShipsGrid(players[1].gameboard)
-      : displayPlayerShipsGrid(players[0].gameboard);
+    changePlayerTurn();
+    showPlayerGrid();
   }
 }
 
 function restartGame() {
-  players = [];
-  createPlayers(testPlayer1, testPlayer2);
-  organizeShips();
-  playerTurn = !playerTurn;
-  organizeShips();
-  playerTurn = !playerTurn;
-  displayPlayerShipsGrid(players[1].gameboard);
+  playerTurn = true;
+  for (const player of players) {
+    player.resetGameboard();
+  }
+  resetPlacementState();
+  showFleetPlacement();
 }
 
+bindOnFormSubmit(processPlayerCreation);
 bindOnClickTemplate(updateActiveShipState);
 bindOnClickAxis(updateIsHorizontalState);
 bindOnClickCreatorCell(processShipPlacement);
+binddblOnClickCreatorCell(processShipRemoval);
+bindOnConfirmFleet(processFleetConfirmation);
 bindOnClickCell(playRound);
 bindOnRestart(restartGame);
-
-createPlayers(testPlayer1, testPlayer2);
-// organizeShips();
-// playerTurn = !playerTurn;
-// organizeShips();
-// playerTurn = !playerTurn;
-// for (let index = 0; index < players.length; index++) {
-//   console.log(`Player ${index + 1} => ${players[index].name}`);
-//   for (let ix = 0; ix < players[index].gameboard.fleetShips.length; ix++) {
-//     console.log(players[index].gameboard.fleetShips[ix]);
-//   }
-// }
-
-// gameLoop: for (let x = 0; x < 10; x++) {
-//   for (let y = 0; y < 10; y++) {
-//     if (!checkGameboards()) {
-//       playRound([x, y]);
-//     } else {
-//       console.log(`The winner is ${!playerTurn ? "Player1" : "Player2"}`);
-//       console.log(
-//         `Missed hits for Player1 => ${players[1].gameboard.missedAttacks}`,
-//       );
-//       console.log(
-//         `Missed hits for Player2 => ${players[0].gameboard.missedAttacks}`,
-//       );
-//       break gameLoop;
-//     }
-//   }
-// }

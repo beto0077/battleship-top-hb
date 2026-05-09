@@ -7,8 +7,20 @@ export class Gameboard {
     this.missedAttacks = [];
   }
 
-  getFleetShips() {
-    return this.fleetShips;
+  getShip(coordinate) {
+    const foundShip = this.fleetShips.find(([, coords]) =>
+      coords.some(([x, y]) => x === coordinate[0] && y === coordinate[1]),
+    );
+
+    return foundShip[0];
+  }
+
+  getShipsDeployed() {
+    const shipsDeployed = this.fleetShips.reduce((shipsDeployed, ship) => {
+      shipsDeployed.push(ship[0].name);
+      return shipsDeployed;
+    }, []);
+    return shipsDeployed;
   }
 
   getShipCoordinates(shipLength, coordinates, orientation) {
@@ -48,40 +60,17 @@ export class Gameboard {
     return true;
   }
 
-  // isPlacementValid(fleet, shipLength, coordinates, orientation) {
-  //   let spacesToOccupy = [];
-  //   if (orientation === "vertical") {
-  //     for (let index = 0; index < shipLength; index++) {
-  //       spacesToOccupy.push([coordinates[0] + index, coordinates[1]]);
-  //     }
-  //   } else if (orientation === "horizontal") {
-  //     for (let index = 0; index < shipLength; index++) {
-  //       spacesToOccupy.push([coordinates[0], coordinates[1] + index]);
-  //     }
-  //   }
-  //   for (const block of spacesToOccupy) {
-  //     const conditionX = 0 <= block[0] && block[0] < 10;
-  //     const conditionY = 0 <= block[1] && block[1] < 10;
-  //     if (!(conditionX && conditionY)) {
-  //       return false;
-  //     }
-  //   }
-  //   for (const coords of fleet[1]) {
-  //     for (const space of spacesToOccupy) {
-  //       const spaceAlreadyTaken = coords.some(
-  //         ([x, y]) => x === space[0] && y === space[1],
-  //       );
-  //       if (spaceAlreadyTaken) {
-  //         return false;
-  //       }
-  //     }
-  //   }
-  //   return { shipLength: shipLength, spacesTaken: spacesToOccupy };
-  // }
-
   placeShip(shipData, coordinates) {
     const ship = new Ship(shipData.name, shipData.size);
     this.fleetShips.push([ship, coordinates]);
+  }
+
+  removeShip(coordinate) {
+    const indexShip = this.fleetShips.findIndex(([, coords]) =>
+      coords.some(([x, y]) => x === coordinate[0] && y === coordinate[1]),
+    );
+
+    this.fleetShips.splice(indexShip, 1);
   }
 
   receiveAttack(coordinates) {

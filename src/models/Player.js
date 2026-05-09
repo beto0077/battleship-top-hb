@@ -6,4 +6,8 @@ export class Player {
     this.gameboard = new Gameboard();
     this.type = playerType;
   }
+
+  resetGameboard() {
+    this.gameboard = new Gameboard();
+  }
 }

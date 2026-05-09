@@ -1,4 +1,6 @@
-export function createGameMessageScreen() {
+import { MESSAGES } from "../initialState.js";
+
+export function createGameMessageScreen(gameStage, winner) {
   const screenContainer = document.createElement("div");
   const messageContainer = document.createElement("div");
   const winnerMarker = document.createElement("div");
@@ -8,8 +10,17 @@ export function createGameMessageScreen() {
   messageContainer.classList.add("message-container");
   winnerMarker.classList.add("winner-marker");
 
-  messageText.textContent =
-    "Welcome to this Battleship game developed by Haakon Beck, I hope you have fun, press Start to start the game.";
+  if (gameStage === "welcome-player") {
+    messageText.textContent = MESSAGES.welcome;
+  } else if (gameStage === "game-over") {
+    if (winner.type === "human") {
+      const winnerMessage = `Captain ${winner.name}, you did it!\n${MESSAGES.win}`;
+      messageText.textContent = winnerMessage;
+    } else {
+      const loserMessage = `${MESSAGES.loss}\n${winner.name} has won this time.`;
+      messageText.textContent = loserMessage;
+    }
+  }
 
   messageContainer.appendChild(winnerMarker);
   messageContainer.appendChild(messageText);

@@ -1,24 +1,20 @@
-export function createShipPlacementGrid(gameboard, cellClickHandler) {
-  console.log(gameboard);
+export function createShipPlacementGrid(
+  gameboard,
+  clickCellHandler,
+  dblClickCellHandler,
+) {
   const boardContainer = document.createElement("div");
   const gridContainer = document.createElement("div");
   boardContainer.classList.add("grid-background");
   gridContainer.classList.add("board-grid");
 
   const coordinatesUsed = [];
-  // if (gameboard) {
-  //   gameboard.fleetShips.forEach(([, shipCoordinates]) => {
-  //     for (const coordinate of shipCoordinates) {
-  //       coordinatesUsed.push(coordinate);
-  //     }
-  //   });
-  // }
   if (gameboard) {
-    for (const [, shipCoordinates] of gameboard.getFleetShips()) {
+    gameboard.fleetShips.forEach(([, shipCoordinates]) => {
       for (const coordinate of shipCoordinates) {
         coordinatesUsed.push(coordinate);
       }
-    }
+    });
   }
 
   for (let x = 0; x < 10; x++) {
@@ -34,8 +30,10 @@ export function createShipPlacementGrid(gameboard, cellClickHandler) {
 
       if (alreadySelected) {
         cell.classList.add("selected-cell");
+        cell.addEventListener("dblclick", dblClickCellHandler);
+      } else {
+        cell.addEventListener("click", clickCellHandler);
       }
-      cell.addEventListener("click", cellClickHandler);
 
       gridContainer.appendChild(cell);
     }

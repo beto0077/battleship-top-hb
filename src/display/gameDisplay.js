@@ -1,8 +1,4 @@
-import {
-  INITIAL_PLAYER_DATA,
-  MESSAGES,
-  SHIPS_TEMPLATES,
-} from "../initialState.js";
+import { INITIAL_PLAYER_DATA, SHIPS_TEMPLATES } from "../initialState.js";
 import { createPlayerInfo } from "../ui/player-info.js";
 import { createGameMessageScreen } from "../ui/game-message-screen.js";
 import { createPlayerForm } from "../ui/player-form.js";
@@ -15,9 +11,12 @@ import { createLoader } from "../ui/loader-circle.js";
 
 const gameContainer = document.querySelector(".game-container");
 
+let onFormSubmit = null;
 let onClickTemplate = null;
 let onClickAxis = null;
 let onClickCreatorCell = null;
+let ondblClickCreatorCell = null;
+let onConfirmFleet = null;
 let onClickCell = null;
 let onRestart = null;
 
@@ -25,6 +24,14 @@ function cleanContainer(container) {
   while (container.firstChild) {
     container.removeChild(container.firstChild);
   }
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const playerData = { name: formData.get("name") };
+  const opponentType = formData.get("opponent");
+  if (onFormSubmit) onFormSubmit(playerData, opponentType);
 }
 
 function handleClickTemplate(event) {
@@ -45,6 +52,18 @@ function handleClickCreatorCell(event) {
     Number(event.target.dataset.y),
   ];
   if (onClickCreatorCell) onClickCreatorCell(coords);
+}
+
+function handledblClickCreatorCell(event) {
+  const coords = [
+    Number(event.target.dataset.x),
+    Number(event.target.dataset.y),
+  ];
+  if (ondblClickCreatorCell) ondblClickCreatorCell(coords);
+}
+
+function handleConfirmFleet() {
+  if (onConfirmFleet) onConfirmFleet();
 }
 
 function handleClickCell(event) {
@@ -69,30 +88,45 @@ function loadGameInfoContent(players) {
   return gameInfoContainer;
 }
 
-function loadGamePanelContent(chosenContent, args) {
+function loadGamePanelContent(chosenContent, ...args) {
   const gamePanelContainer = document.createElement("div");
   gamePanelContainer.classList.add("game-panel");
 
   switch (chosenContent) {
     case "message-screen":
-      gamePanelContainer.appendChild(createGameMessageScreen(args));
+      gamePanelContainer.appendChild(createGameMessageScreen("welcome-player"));
       break;
 
     case "player-form":
-      gamePanelContainer.appendChild(createPlayerForm());
+      gamePanelContainer.appendChild(
+        createPlayerForm(args[0], handleFormSubmit),
+      );
       break;
 
     case "fleet-placement":
       gamePanelContainer.appendChild(
-        createShipPlacementGrid(args, handleClickCreatorCell),
+        createShipPlacementGrid(
+          args[0],
+          handleClickCreatorCell,
+          handledblClickCreatorCell,
+        ),
       );
       break;
 
     case "player-grid":
       gamePanelContainer.appendChild(
-        createPlayerShipsGrid(args, handleClickCell),
+        createPlayerShipsGrid(args[0], handleClickCell),
       );
       break;
+
+    case "game-over": {
+      const [loserGameboard, winner] = args;
+      gamePanelContainer.appendChild(createPlayerShipsGrid(loserGameboard));
+      gamePanelContainer.appendChild(
+        createGameMessageScreen("game-over", winner),
+      );
+      break;
+    }
 
     default:
       console.log("Something is wrong bro...");
@@ -102,7 +136,7 @@ function loadGamePanelContent(chosenContent, args) {
   return gamePanelContainer;
 }
 
-function loadGameControlContent(chosenContent) {
+function loadGameControlContent(chosenContent, args) {
   const gameControlContainer = document.createElement("div");
   gameControlContainer.classList.add("game-control");
 
@@ -113,24 +147,23 @@ function loadGameControlContent(chosenContent) {
           SHIPS_TEMPLATES,
           handleClickTemplate,
           handleClickAxis,
+          handleConfirmFleet,
+          args,
         ),
       );
       break;
 
     case "start":
-      // gameControlContainer.appendChild(
-      //   createGameButton(false, () => {
-      //     displayPlayerForm();
-      //   }),
-      // );
       gameControlContainer.appendChild(
         createGameButton(false, () => {
-          displayFleetCreator("Test bro");
+          displayPlayerForm();
         }),
       );
+      // gameControlContainer.appendChild(createGameButton(false, handleStart));
       break;
 
     case "restart":
+      gameControlContainer.appendChild(createGameButton(true, handleRestart));
       break;
 
     case "game-stats":
@@ -151,41 +184,58 @@ function loadGameControlContent(chosenContent) {
 
 function displayInitialGameScreen() {
   const gameInfo = loadGameInfoContent(INITIAL_PLAYER_DATA);
-  const gamePanel = loadGamePanelContent("message-screen", MESSAGES.welcome);
+  const gamePanel = loadGamePanelContent("message-screen");
   const gameControl = loadGameControlContent("start");
   gameContainer.appendChild(gameInfo);
   gameContainer.appendChild(gamePanel);
   gameContainer.appendChild(gameControl);
 }
 
-function displayPlayerForm(players = INITIAL_PLAYER_DATA) {
+export function displayPlayerForm(
+  players = INITIAL_PLAYER_DATA,
+  isPlayer2Human,
+) {
   cleanContainer(gameContainer);
   const gameInfo = loadGameInfoContent(players);
-  const gamePanel = loadGamePanelContent("player-form");
+  const gamePanel = loadGamePanelContent("player-form", isPlayer2Human);
   const gameControl = loadGameControlContent("loader-circle");
   gameContainer.appendChild(gameInfo);
   gameContainer.appendChild(gamePanel);
   gameContainer.appendChild(gameControl);
 }
 
-function displayFleetCreator(gameboard) {
+export function displayFleetCreator(players, gameboard, placementState) {
   cleanContainer(gameContainer);
-  const gameInfo = loadGameInfoContent(INITIAL_PLAYER_DATA);
+  const gameInfo = loadGameInfoContent(players);
   const gamePanel = loadGamePanelContent("fleet-placement", gameboard);
-  const gameControl = loadGameControlContent("ship-templates");
+  const gameControl = loadGameControlContent("ship-templates", placementState);
   gameContainer.appendChild(gameInfo);
   gameContainer.appendChild(gamePanel);
   gameContainer.appendChild(gameControl);
 }
 
-export function displayPlayerShipsGrid(gameboard) {
+export function displayPlayerShipsGrid(players, gameboard) {
   cleanContainer(gameContainer);
-  const playerShipsGrid = createPlayerShipsGrid(gameboard, handleClickCell);
+  const gameInfo = loadGameInfoContent(players);
+  const gamePanel = loadGamePanelContent("player-grid", gameboard);
+  const gameControl = loadGameControlContent("game-stats");
+  gameContainer.appendChild(gameInfo);
+  gameContainer.appendChild(gamePanel);
+  gameContainer.appendChild(gameControl);
 }
 
-export function displayGameWinner(winnerId) {
-  const winner = winnerId === 0 ? "Player 1" : "Player 2";
-  const winnerMessage = `${winner} has won the game.\nCongratulations!`;
+export function displayGameWinner(players, winner, loserGameboard) {
+  cleanContainer(gameContainer);
+  const gameInfo = loadGameInfoContent(players);
+  const gamePanel = loadGamePanelContent("game-over", loserGameboard, winner);
+  const gameControl = loadGameControlContent("restart");
+  gameContainer.appendChild(gameInfo);
+  gameContainer.appendChild(gamePanel);
+  gameContainer.appendChild(gameControl);
+}
+
+export function bindOnFormSubmit(callback) {
+  onFormSubmit = callback;
 }
 
 export function bindOnClickTemplate(callback) {
@@ -200,6 +250,14 @@ export function bindOnClickCreatorCell(callback) {
   onClickCreatorCell = callback;
 }
 
+export function binddblOnClickCreatorCell(callback) {
+  ondblClickCreatorCell = callback;
+}
+
+export function bindOnConfirmFleet(callback) {
+  onConfirmFleet = callback;
+}
+
 export function bindOnClickCell(callback) {
   onClickCell = callback;
 }
@@ -207,7 +265,5 @@ export function bindOnClickCell(callback) {
 export function bindOnRestart(callback) {
   onRestart = callback;
 }
-
-// restartButton.addEventListener("click", restartBoard);
 
 document.addEventListener("DOMContentLoaded", displayInitialGameScreen);
