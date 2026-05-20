@@ -3,12 +3,12 @@ import { MESSAGES } from "../initialState.js";
 export function createGameMessageScreen(gameStage, winner) {
   const screenContainer = document.createElement("div");
   const messageContainer = document.createElement("div");
-  const winnerMarker = document.createElement("div");
+  // const winnerMarker = document.createElement("div");
   const messageText = document.createElement("p");
 
   screenContainer.classList.add("game-message-screen");
   messageContainer.classList.add("message-container");
-  winnerMarker.classList.add("winner-marker");
+  // winnerMarker.classList.add("winner-marker");
 
   if (gameStage === "welcome-player") {
     messageText.textContent = MESSAGES.welcome;
@@ -22,7 +22,7 @@ export function createGameMessageScreen(gameStage, winner) {
     }
   }
 
-  messageContainer.appendChild(winnerMarker);
+  // messageContainer.appendChild(winnerMarker);
   messageContainer.appendChild(messageText);
   screenContainer.appendChild(messageContainer);
 

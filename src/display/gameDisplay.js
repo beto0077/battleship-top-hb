@@ -5,6 +5,7 @@ import { createPlayerForm } from "../ui/player-form.js";
 import { createShipPlacementGrid } from "../ui/ship-placement-grid.js";
 import { createShipTemplates } from "../ui/ship-template-buttons.js";
 import { createPlayerShipsGrid } from "../ui/player-ships-grid.js";
+import { createComputerShipsGrid } from "../ui/computer-ships-grid.js";
 import { createGameButton } from "../ui/general-game-buttons.js";
 import { createGameStats } from "../ui/game-stats.js";
 import { createLoader } from "../ui/loader-circle.js";
@@ -113,11 +114,27 @@ function loadGamePanelContent(chosenContent, ...args) {
       );
       break;
 
-    case "player-grid":
-      gamePanelContainer.appendChild(
-        createPlayerShipsGrid(args[0], handleClickCell),
-      );
+    case "player-grid": {
+      const [playerGameboard, computerGameboard] = args;
+      if (computerGameboard) {
+        gamePanelContainer.appendChild(
+          createPlayerShipsGrid(computerGameboard, handleClickCell),
+        );
+        gamePanelContainer.appendChild(
+          createComputerShipsGrid(playerGameboard),
+        );
+      } else {
+        gamePanelContainer.appendChild(
+          createPlayerShipsGrid(playerGameboard, handleClickCell),
+        );
+      }
       break;
+    }
+    // case "player-grid":
+    //   gamePanelContainer.appendChild(
+    //     createPlayerShipsGrid(args[0], handleClickCell),
+    //   );
+    //   break;
 
     case "game-over": {
       const [loserGameboard, winner] = args;
@@ -214,10 +231,10 @@ export function displayFleetCreator(players, gameboard, placementState) {
   gameContainer.appendChild(gameControl);
 }
 
-export function displayPlayerShipsGrid(players, gameboard) {
+export function displayPlayerShipsGrid(players, ...gameboards) {
   cleanContainer(gameContainer);
   const gameInfo = loadGameInfoContent(players);
-  const gamePanel = loadGamePanelContent("player-grid", gameboard);
+  const gamePanel = loadGamePanelContent("player-grid", ...gameboards);
   const gameControl = loadGameControlContent("game-stats");
   gameContainer.appendChild(gameInfo);
   gameContainer.appendChild(gamePanel);

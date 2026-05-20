@@ -28,9 +28,6 @@ import {
   bindOnSelectedCoordsPlay,
 } from "./computerController.js";
 
-//temporary import, REMOVE LATER
-//import { testComputerController } from "./computerController.js";
-
 let players = [];
 let playerTurn = true; //true as player 1 and false as player 2 => Don't overthink it bro...
 let currentPlayer = null;
@@ -46,8 +43,6 @@ function updateCurrentPlayer() {
 
 function changePlayerTurn() {
   playerTurn = !playerTurn;
-  // const currentPlayer = playerTurn ? players[0] : players[1];
-  //provisionalPlayerVariable = playerTurn ? players[0] : players[1];
   updateCurrentPlayer();
   console.log(`Turn of ${currentPlayer.name}`);
 }
@@ -63,7 +58,6 @@ function resetActiveShipState() {
 
 function updateIsHorizontalState() {
   placementState.isHorizontal = !placementState.isHorizontal;
-  //const currentPlayer = playerTurn ? players[0] : players[1];
   if (currentPlayer.type === "human") {
     showFleetPlacement();
   } else {
@@ -72,16 +66,10 @@ function updateIsHorizontalState() {
 }
 
 function updateShipsDeployedState() {
-  //const currentPlayer = playerTurn ? players[0] : players[1];
   placementState.shipsDeployed = currentPlayer.gameboard.getShipsDeployed();
 }
 
 function resetPlacementState() {
-  // placementState.activeShip = null;
-  // placementState.isHorizontal = true;
-
-  // // Empty the array without creating a new one
-  // placementState.shipsDeployed.length = 0;
   placementState = {
     activeShip: null,
     isHorizontal: true,
@@ -90,7 +78,6 @@ function resetPlacementState() {
 }
 
 function showFleetPlacement() {
-  //const currentPlayer = playerTurn ? players[0] : players[1];
   updateShipsDeployedState();
   displayFleetCreator(players, currentPlayer.gameboard, placementState);
 }
@@ -98,10 +85,11 @@ function showFleetPlacement() {
 function showPlayerGrid() {
   const currentOpponent = playerTurn ? players[1] : players[0];
   console.log(`Gameboard of ${currentOpponent.name}`);
-  // if (players[1].type === "computer") {
-  //   displayPlayerShipsGrid(players, players[0].gameboard, players[1].gameboard);
-  // }
-  displayPlayerShipsGrid(players, currentOpponent.gameboard);
+  if (players[1].type === "computer") {
+    displayPlayerShipsGrid(players, players[0].gameboard, players[1].gameboard);
+  } else {
+    displayPlayerShipsGrid(players, currentOpponent.gameboard);
+  }
 }
 
 function processPlayerCreation(playerData, opponentType) {
@@ -125,8 +113,6 @@ function processPlayerCreation(playerData, opponentType) {
 }
 
 function processShipPlacement(coords) {
-  //const currentPlayer = playerTurn ? players[0] : players[1];
-
   if (!placementState.activeShip) {
     console.log("There is no ship selected bro...");
     return;
@@ -151,7 +137,6 @@ function processShipPlacement(coords) {
 }
 
 function processShipRemoval(coords) {
-  //const currentPlayer = playerTurn ? players[0] : players[1];
   const shipFound = currentPlayer.gameboard.getShip(coords);
   const shipModel = {
     name: shipFound.name,
@@ -174,10 +159,6 @@ function processFleetConfirmation() {
   } else {
     if (players[1].type === "computer") {
       console.log("Computer create its fleet here bro... amazing, right?");
-      // for (let index = 0; index < 10; index++) {
-      //   placeComputerFleet(placementState);
-      // }
-      //resetPlacementState();
       placeComputerFleet(placementState);
     } else {
       showFleetPlacement();
@@ -201,21 +182,22 @@ function playRound(coords) {
   if (checkGameboards()) {
     resetWasAttackSuccessful();
     const winner = currentPlayer;
+    console.log(`Game over, the winner is ${winner.name}`);
     const loserGameboard = playerTurn
       ? players[1].gameboard
       : players[0].gameboard;
     displayGameWinner(players, winner, loserGameboard);
-    return true;
+    return;
   }
   if (attackResult == "hit") {
     if (currentPlayer.type === "computer") {
       console.log("Attack from computer was a hit");
-      alert("It was a hit MF!!");
       confirmAttackSuccess();
-      playComputerTurn();
-    } else {
       showPlayerGrid();
+      playComputerTurn();
+      return;
     }
+    showPlayerGrid();
   } else {
     if (currentPlayer.type === "computer") {
       console.log("Attack from computer was a miss");
@@ -224,9 +206,9 @@ function playRound(coords) {
     changePlayerTurn();
     if (currentPlayer.type === "computer") {
       playComputerTurn();
-    } else {
-      showPlayerGrid();
+      return; //test
     }
+    showPlayerGrid();
   }
 }
 
@@ -256,6 +238,3 @@ bindOnSelectedAxis(updateIsHorizontalState);
 bindOnSelectedCoordsCreator(processShipPlacement);
 bindOnConfirmComputerFleet(processFleetConfirmation);
 bindOnSelectedCoordsPlay(playRound);
-
-//REMOVE LATER
-//testComputerController();
