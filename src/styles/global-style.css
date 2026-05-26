@@ -56,12 +56,11 @@ body {
 
   .player-avatar {
     flex: 1;
-    /* background-image: url("./assets/images/avatar-1299805_1920.png"); */
-    background-color: darkblue;
+    background-image: url("../assets/images/battleship.png");
     background-size: 55%;
     background-repeat: no-repeat;
     background-position: center center;
-    /* filter: invert(100%); */
+    filter: invert(100%);
   }
 
   .player-name {
@@ -79,6 +78,27 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.game-panel.dual-board-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 1.25rem;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+.game-panel.dual-board-layout .grid-background {
+  width: 100%;
+  max-width: 520px;
+}
+
+@media (min-width: 1400px) {
+  .game-panel.dual-board-layout .grid-background {
+    max-width: 480px;
+  }
 }
 
 .grid-background {
@@ -135,15 +155,89 @@ body {
   }
 
   .ship-templates {
+    width: min(280px, 100%);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    button {
-      font-size: 1.5rem;
-      padding: 0.2em 0.5em;
-    }
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .ship-templates-title {
+    color: #f1f6ff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 -0.25rem 0;
+    align-self: flex-start;
+  }
+
+  .ship-button,
+  .axis-button,
+  .confirm-button {
+    font-size: 1.1rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    transition:
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background 120ms ease;
+  }
+
+  .ship-button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .ship-button:hover:not(:disabled),
+  .axis-button:hover,
+  .confirm-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  .ship-button .ship-name {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .ship-button .ship-size {
+    font-size: 0.8rem;
+    opacity: 0.85;
+  }
+
+  .ship-button.is-selected {
+    border-color: #7ad7ff;
+    box-shadow: 0 0 0 2px rgba(122, 215, 255, 0.35);
+    background: rgba(122, 215, 255, 0.18);
+  }
+
+  .ship-button.is-used {
+    opacity: 0.45;
+  }
+
+  .ship-button:disabled {
+    cursor: not-allowed;
+  }
+
+  .axis-button {
+    margin-top: 0.35rem;
+    border-color: rgba(255, 214, 102, 0.45);
+    background: rgba(255, 214, 102, 0.12);
+    font-weight: 700;
+  }
+
+  .confirm-button {
+    margin-top: 0.35rem;
+    border-color: rgba(76, 217, 100, 0.55);
+    background: rgba(76, 217, 100, 0.16);
+    font-weight: 700;
   }
 
   .game-stats {
@@ -192,12 +286,10 @@ body {
   }
 }
 
-/* Style for game message screen */
 .game-message-screen {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.2);
   border-radius: 15px;
 
   .message-container {
@@ -209,18 +301,6 @@ body {
     align-items: center;
     gap: 1rem;
 
-    /* .winner-marker {
-      background: rgba(255, 255, 255);
-      box-shadow: 1px 1px 5px black;
-      border-radius: 15px;
-      height: 50%;
-      width: min(375px, 50%);
-      background-image: url("./assets/images/hb-logo-black.png");
-      background-size: 70%;
-      background-repeat: no-repeat;
-      background-position: center center;
-    } */
-
     p {
       font-size: 2rem;
       background: rgba(255, 255, 255);
@@ -228,6 +308,365 @@ body {
       border-radius: 15px;
       text-align: center;
       padding: 1rem;
+      white-space: pre-line;
+      width: min(760px, 92%);
     }
+
+    ul {
+      width: min(760px, 92%);
+      max-height: 70%;
+      overflow: auto;
+      margin: 0;
+      padding: 1rem 1.25rem 1rem 2rem;
+      background: rgba(255, 255, 255);
+      box-shadow: 1px 1px 5px black;
+      border-radius: 15px;
+      color: #101318;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    li + li {
+      margin-top: 0.55rem;
+    }
+  }
+  .privacy-mode {
+    border-radius: 100px;
+    background: rgb(99, 99, 99);
+  }
+}
+
+/* =========================
+   Player form styling
+   ========================= */
+.player-form {
+  width: min(560px, 92%);
+  color: #f2f5ff;
+}
+
+.player-form .main-form-fieldset {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  padding: 1.25rem 1.25rem 1rem;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 24, 35, 0.88) 0%,
+    rgba(11, 15, 23, 0.82) 100%
+  );
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  display: grid;
+  gap: 1rem;
+}
+
+.player-form .form-title {
+  padding: 0 0.45rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.25px;
+  color: #eaf2ff;
+}
+
+.player-form label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.95rem;
+  color: #d3def7;
+}
+
+.player-form input[type="text"] {
+  width: 100%;
+  border: 1px solid rgba(173, 198, 255, 0.35);
+  border-radius: 9px;
+  padding: 0.62rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f7faff;
+  font-size: 1rem;
+  outline: none;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease;
+}
+
+.player-form input[type="text"]::placeholder {
+  color: rgba(230, 238, 255, 0.45);
+}
+
+.player-form input[type="text"]:focus {
+  border-color: #7ad7ff;
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 2px rgba(122, 215, 255, 0.24);
+}
+
+.player-form .opponent-choice {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.player-form .opponent-choice legend {
+  padding: 0 0.35rem;
+  font-size: 0.9rem;
+  color: #dbe7ff;
+}
+
+.player-form .opponent-choice > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.player-form .opponent-choice input[type="radio"] {
+  accent-color: #7ad7ff;
+  transform: translateY(1px);
+}
+
+.player-form .opponent-option {
+  margin: 0;
+  font-size: 0.96rem;
+  color: #f1f6ff;
+}
+
+.player-form .submit-button {
+  justify-self: start;
+  border: 1px solid rgba(122, 215, 255, 0.5);
+  border-radius: 10px;
+  background: linear-gradient(
+    180deg,
+    rgba(122, 215, 255, 0.26) 0%,
+    rgba(122, 215, 255, 0.16) 100%
+  );
+  color: #f7fbff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.58rem 1rem;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease;
+}
+
+.player-form .submit-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(122, 215, 255, 0.34) 0%,
+    rgba(122, 215, 255, 0.22) 100%
+  );
+}
+
+.player-form .submit-button:active {
+  transform: translateY(0);
+}
+
+.player-form .main-form-fieldset {
+  position: relative;
+}
+
+.player-form .main-form-fieldset::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7ad7ff 0%, transparent 100%);
+}
+
+/* Base shared style for start/restart */
+.game-control .btn-style.start-button,
+.game-control .btn-style.restart-button {
+  font-family: "SYN Nova", Arial, Helvetica, sans-serif;
+  /* padding: 0.62em 1.6em; */
+  border: none;
+  outline: none;
+  color: #f7fbff;
+  background: #12161f;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 12px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  /* font-size: 1.15rem; */
+  font-weight: 700;
+  letter-spacing: 0.35px;
+  transition:
+    transform 140ms ease,
+    filter 140ms ease;
+}
+
+/* Glow ring layer */
+.game-control .btn-style.start-button::before,
+.game-control .btn-style.restart-button::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  border-radius: inherit;
+  z-index: -2;
+  background-size: 220% 220%;
+  filter: blur(6px);
+  -webkit-filter: blur(6px);
+  opacity: 0.92;
+  animation: tactical-btn-glow 6s ease-in-out infinite;
+}
+
+/* Inner plate layer */
+.game-control .btn-style.start-button::after,
+.game-control .btn-style.restart-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* START theme - green */
+.game-control .btn-style.start-button::before {
+  background-image: linear-gradient(
+    135deg,
+    #0b3a1d,
+    #1f8f49,
+    #58d68d,
+    #1f8f49,
+    #0b3a1d
+  );
+}
+
+/* RESTART theme */
+.game-control .btn-style.restart-button::before {
+  background-image: linear-gradient(
+    135deg,
+    #4a2b00,
+    #9a5b12,
+    #f0aa4b,
+    #9a5b12,
+    #4a2b00
+  );
+}
+
+/* Interactions */
+.game-control .btn-style.start-button:hover,
+.game-control .btn-style.restart-button:hover {
+  transform: translateY(-1px) scale(1.01);
+}
+
+.game-control .btn-style.start-button:active,
+.game-control .btn-style.restart-button:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.game-control .btn-style.start-button:hover::before,
+.game-control .btn-style.restart-button:hover::before {
+  filter: blur(7px);
+  -webkit-filter: blur(7px);
+  opacity: 1;
+}
+
+.game-control .btn-style.start-button:focus-visible,
+.game-control .btn-style.restart-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16);
+}
+
+/* Gentle animated shift */
+@keyframes tactical-btn-glow {
+  0% {
+    background-position: 0% 40%;
+  }
+  50% {
+    background-position: 100% 60%;
+  }
+  100% {
+    background-position: 0% 40%;
+  }
+}
+
+/* =========================
+   Player identity glow (reusable)
+   ========================= */
+.player-glow {
+  position: relative;
+  border-radius: 5px;
+
+  --glow-core: rgba(0, 0, 0, 0.8);
+  --glow-soft: rgba(0, 0, 0, 0.45);
+  --ring: rgba(0, 0, 0, 0.9);
+
+  outline: 1px solid var(--ring);
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 0 8px 1px var(--glow-soft),
+    0 0 18px 3px var(--glow-core);
+
+  animation: pulse-glow 2.4s ease-in-out infinite;
+}
+
+/* Player 1 blue */
+.player-glow--p1 {
+  --ring: rgba(38, 98, 196, 0.95);
+  --glow-soft: rgba(38, 98, 196, 0.45);
+  --glow-core: rgba(19, 56, 122, 0.65);
+}
+
+/* Player 2 red */
+.player-glow--p2 {
+  --ring: rgba(176, 45, 45, 0.95);
+  --glow-soft: rgba(176, 45, 45, 0.45);
+  --glow-core: rgba(102, 23, 23, 0.65);
+}
+
+/* Defeat / loser board theme */
+.player-glow--defeat {
+  --ring: rgba(120, 128, 145, 0.9);
+  --glow-soft: rgba(120, 128, 145, 0.35);
+  --glow-core: rgba(70, 76, 90, 0.55);
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px var(--ring),
+      0 0 8px 1px var(--glow-soft),
+      0 0 18px 3px var(--glow-core);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px var(--ring),
+      0 0 12px 2px var(--glow-soft),
+      0 0 26px 5px var(--glow-core);
+  }
+}
+
+@media (max-width: 980px) {
+  .game-panel.dual-board-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  .game-panel.dual-board-layout .grid-background {
+    max-width: min(550px, 100%);
   }
 }

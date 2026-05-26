@@ -2,10 +2,11 @@ export function createShipPlacementGrid(
   gameboard,
   clickCellHandler,
   dblClickCellHandler,
+  playerTheme,
 ) {
   const boardContainer = document.createElement("div");
   const gridContainer = document.createElement("div");
-  boardContainer.classList.add("grid-background");
+  boardContainer.classList.add("grid-background", "player-glow", playerTheme);
   gridContainer.classList.add("board-grid");
 
   const coordinatesUsed = [];

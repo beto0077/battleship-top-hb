@@ -18,6 +18,8 @@ let onClickAxis = null;
 let onClickCreatorCell = null;
 let ondblClickCreatorCell = null;
 let onConfirmFleet = null;
+let onClickHelpContainer = null;
+let onClickTurnScreen = null;
 let onClickCell = null;
 let onRestart = null;
 
@@ -35,10 +37,18 @@ function handleFormSubmit(event) {
   if (onFormSubmit) onFormSubmit(playerData, opponentType);
 }
 
+// function handleClickTemplate(event) {
+//   const shipModel = {
+//     name: event.target.dataset.ship,
+//     size: event.target.dataset.size,
+//   };
+//   if (onClickTemplate) onClickTemplate(shipModel);
+// }
 function handleClickTemplate(event) {
+  const button = event.currentTarget;
   const shipModel = {
-    name: event.target.dataset.ship,
-    size: event.target.dataset.size,
+    name: button.dataset.ship,
+    size: Number(button.dataset.size),
   };
   if (onClickTemplate) onClickTemplate(shipModel);
 }
@@ -65,6 +75,14 @@ function handledblClickCreatorCell(event) {
 
 function handleConfirmFleet() {
   if (onConfirmFleet) onConfirmFleet();
+}
+
+function handleClickHelpContainer() {
+  if (onClickHelpContainer) onClickHelpContainer();
+}
+
+function handleClickTurnScreen() {
+  if (onClickTurnScreen) onClickTurnScreen();
 }
 
 function handleClickCell(event) {
@@ -104,19 +122,36 @@ function loadGamePanelContent(chosenContent, ...args) {
       );
       break;
 
-    case "fleet-placement":
+    case "fleet-placement": {
+      const [gameboard, playerRequiresHelpCreator, playerTheme] = args;
       gamePanelContainer.appendChild(
         createShipPlacementGrid(
-          args[0],
+          gameboard,
           handleClickCreatorCell,
           handledblClickCreatorCell,
+          playerTheme,
         ),
       );
+      if (playerRequiresHelpCreator) {
+        const helper = createGameMessageScreen("fleet-help");
+        helper.addEventListener("click", handleClickHelpContainer);
+        gamePanelContainer.appendChild(helper);
+      }
       break;
+    }
 
     case "player-grid": {
-      const [playerGameboard, computerGameboard] = args;
+      const [
+        turnScreenVisible,
+        currentPlayer,
+        playerTheme,
+        playerGameboard,
+        computerGameboard,
+      ] = args;
+
       if (computerGameboard) {
+        gamePanelContainer.classList.add("dual-board-layout");
+
         gamePanelContainer.appendChild(
           createPlayerShipsGrid(computerGameboard, handleClickCell),
         );
@@ -125,20 +160,41 @@ function loadGamePanelContent(chosenContent, ...args) {
         );
       } else {
         gamePanelContainer.appendChild(
-          createPlayerShipsGrid(playerGameboard, handleClickCell),
+          createPlayerShipsGrid(playerGameboard, handleClickCell, playerTheme),
         );
+        if (turnScreenVisible) {
+          const playerTurnScreen = createGameMessageScreen(
+            "player-turn",
+            currentPlayer,
+          );
+          playerTurnScreen.addEventListener("click", handleClickTurnScreen);
+          gamePanelContainer.appendChild(playerTurnScreen);
+        }
       }
       break;
     }
-    // case "player-grid":
-    //   gamePanelContainer.appendChild(
-    //     createPlayerShipsGrid(args[0], handleClickCell),
-    //   );
+    // case "player-grid": {
+    //   const [playerGameboard, computerGameboard] = args;
+    //   if (computerGameboard) {
+    //     gamePanelContainer.appendChild(
+    //       createPlayerShipsGrid(computerGameboard, handleClickCell),
+    //     );
+    //     gamePanelContainer.appendChild(
+    //       createComputerShipsGrid(playerGameboard),
+    //     );
+    //   } else {
+    //     gamePanelContainer.appendChild(
+    //       createPlayerShipsGrid(playerGameboard, handleClickCell),
+    //     );
+    //   }
     //   break;
+    // }
 
     case "game-over": {
       const [loserGameboard, winner] = args;
-      gamePanelContainer.appendChild(createPlayerShipsGrid(loserGameboard));
+      gamePanelContainer.appendChild(
+        createPlayerShipsGrid(loserGameboard, null, "player-glow--defeat"),
+      );
       gamePanelContainer.appendChild(
         createGameMessageScreen("game-over", winner),
       );
@@ -153,22 +209,25 @@ function loadGamePanelContent(chosenContent, ...args) {
   return gamePanelContainer;
 }
 
-function loadGameControlContent(chosenContent, args) {
+function loadGameControlContent(chosenContent, ...args) {
   const gameControlContainer = document.createElement("div");
   gameControlContainer.classList.add("game-control");
 
   switch (chosenContent) {
-    case "ship-templates":
+    case "ship-templates": {
+      const [placementState, currentPlayerName] = args;
       gameControlContainer.appendChild(
         createShipTemplates(
           SHIPS_TEMPLATES,
           handleClickTemplate,
           handleClickAxis,
           handleConfirmFleet,
-          args,
+          placementState,
+          currentPlayerName,
         ),
       );
       break;
+    }
 
     case "start":
       gameControlContainer.appendChild(
@@ -183,9 +242,11 @@ function loadGameControlContent(chosenContent, args) {
       gameControlContainer.appendChild(createGameButton(true, handleRestart));
       break;
 
-    case "game-stats":
-      gameControlContainer.appendChild(createGameStats());
+    case "game-stats": {
+      const [players, winsStatus] = args;
+      gameControlContainer.appendChild(createGameStats(players, winsStatus));
       break;
+    }
 
     case "loader-circle":
       gameControlContainer.appendChild(createLoader());
@@ -221,21 +282,50 @@ export function displayPlayerForm(
   gameContainer.appendChild(gameControl);
 }
 
-export function displayFleetCreator(players, gameboard, placementState) {
+export function displayFleetCreator(
+  players,
+  currentPlayerName,
+  gameboard,
+  placementState,
+  playerRequiresHelpCreator,
+  playerTheme,
+) {
   cleanContainer(gameContainer);
   const gameInfo = loadGameInfoContent(players);
-  const gamePanel = loadGamePanelContent("fleet-placement", gameboard);
-  const gameControl = loadGameControlContent("ship-templates", placementState);
+  const gamePanel = loadGamePanelContent(
+    "fleet-placement",
+    gameboard,
+    playerRequiresHelpCreator,
+    playerTheme,
+  );
+  const gameControl = loadGameControlContent(
+    "ship-templates",
+    placementState,
+    currentPlayerName,
+  );
   gameContainer.appendChild(gameInfo);
   gameContainer.appendChild(gamePanel);
   gameContainer.appendChild(gameControl);
 }
 
-export function displayPlayerShipsGrid(players, ...gameboards) {
+export function displayPlayerShipsGrid(
+  turnScreenVisible,
+  playerTheme,
+  players,
+  currentPlayer,
+  winsStatus,
+  ...gameboards
+) {
   cleanContainer(gameContainer);
   const gameInfo = loadGameInfoContent(players);
-  const gamePanel = loadGamePanelContent("player-grid", ...gameboards);
-  const gameControl = loadGameControlContent("game-stats");
+  const gamePanel = loadGamePanelContent(
+    "player-grid",
+    turnScreenVisible,
+    currentPlayer,
+    playerTheme,
+    ...gameboards,
+  );
+  const gameControl = loadGameControlContent("game-stats", players, winsStatus);
   gameContainer.appendChild(gameInfo);
   gameContainer.appendChild(gamePanel);
   gameContainer.appendChild(gameControl);
@@ -273,6 +363,14 @@ export function binddblOnClickCreatorCell(callback) {
 
 export function bindOnConfirmFleet(callback) {
   onConfirmFleet = callback;
+}
+
+export function bindOnClickHelpContainer(callback) {
+  onClickHelpContainer = callback;
+}
+
+export function bindOnClickTurnScreen(callback) {
+  onClickTurnScreen = callback;
 }
 
 export function bindOnClickCell(callback) {

@@ -1,7 +1,11 @@
 export function createComputerShipsGrid(gameboard) {
   const boardContainer = document.createElement("div");
   const gridContainer = document.createElement("div");
-  boardContainer.classList.add("grid-background");
+  boardContainer.classList.add(
+    "grid-background",
+    "player-glow",
+    "player-glow--p2",
+  );
   gridContainer.classList.add("board-grid");
 
   for (let x = 0; x < 10; x++) {

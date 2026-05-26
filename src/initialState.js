@@ -35,3 +35,14 @@ export const COMPUTER_NAMES = [
   "Capt. Haddock",
   "Capt. Barbosa",
 ];
+
+export const FLEET_HELP = {
+  title: "Fleet placement tips",
+  lines: [
+    "Use the buttons on the right to select a ship.",
+    "Click a board cell to place the selected ship.",
+    "Use the orientation button to switch between horizontal and vertical placement.",
+    "Double-click a placed ship to remove it and adjust your layout.",
+    "Ships placed in invalid positions will not be added to the board.",
+  ],
+};

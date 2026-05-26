@@ -4,6 +4,13 @@ export function createPlayerInfo(player, index) {
   const nameParagraph = document.createElement("p");
 
   container.classList.add("player-info");
+
+  if (index === 1) {
+    container.classList.add("player-glow", "player-glow--p1");
+  } else {
+    container.classList.add("player-glow", "player-glow--p2");
+  }
+
   container.dataset.player = index;
 
   avatar.classList.add("player-avatar");

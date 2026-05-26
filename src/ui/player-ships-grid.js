@@ -1,7 +1,12 @@
-export function createPlayerShipsGrid(gameboard, cellClickHandler) {
+export function createPlayerShipsGrid(
+  gameboard,
+  cellClickHandler,
+  playerTheme = "player-glow--p1",
+) {
   const boardContainer = document.createElement("div");
   const gridContainer = document.createElement("div");
-  boardContainer.classList.add("grid-background");
+  console.log(playerTheme);
+  boardContainer.classList.add("grid-background", "player-glow", playerTheme);
   gridContainer.classList.add("board-grid");
 
   for (let x = 0; x < 10; x++) {

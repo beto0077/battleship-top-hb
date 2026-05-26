@@ -11,6 +11,8 @@ import {
   bindOnClickCreatorCell,
   binddblOnClickCreatorCell,
   bindOnConfirmFleet,
+  bindOnClickHelpContainer,
+  bindOnClickTurnScreen,
   bindOnClickCell,
   bindOnRestart,
 } from "../display/gameDisplay.js";
@@ -36,9 +38,20 @@ let placementState = {
   isHorizontal: true,
   shipsDeployed: [],
 };
+let playerRequiresHelpCreator = true;
+let playerTheme = "";
+let turnScreenVisible = true;
+let winsStatus = {
+  player1Wins: 0,
+  player2Wins: 0,
+};
 
 function updateCurrentPlayer() {
   currentPlayer = playerTurn ? players[0] : players[1];
+}
+
+function updatePlayerTheme() {
+  playerTheme = playerTurn ? "player-glow--p1" : "player-glow--p2";
 }
 
 function changePlayerTurn() {
@@ -47,8 +60,27 @@ function changePlayerTurn() {
   console.log(`Turn of ${currentPlayer.name}`);
 }
 
+function updateHelpCreatorState() {
+  playerRequiresHelpCreator = false;
+  showFleetPlacement();
+}
+
+function resetHelpCreatorState() {
+  playerRequiresHelpCreator = true;
+  showFleetPlacement();
+}
+
+function updateTurnScreenVisible() {
+  turnScreenVisible = false;
+  showPlayerGrid();
+}
+
 function updateActiveShipState(shipModel) {
   placementState.activeShip = shipModel;
+  if (playerRequiresHelpCreator) {
+    playerRequiresHelpCreator = !playerRequiresHelpCreator;
+  }
+  showFleetPlacement();
   console.log(placementState.activeShip);
 }
 
@@ -79,16 +111,40 @@ function resetPlacementState() {
 
 function showFleetPlacement() {
   updateShipsDeployedState();
-  displayFleetCreator(players, currentPlayer.gameboard, placementState);
+  updatePlayerTheme();
+  displayFleetCreator(
+    players,
+    currentPlayer.name,
+    currentPlayer.gameboard,
+    placementState,
+    playerRequiresHelpCreator,
+    playerTheme,
+  );
 }
 
 function showPlayerGrid() {
   const currentOpponent = playerTurn ? players[1] : players[0];
+  updatePlayerTheme();
   console.log(`Gameboard of ${currentOpponent.name}`);
   if (players[1].type === "computer") {
-    displayPlayerShipsGrid(players, players[0].gameboard, players[1].gameboard);
+    displayPlayerShipsGrid(
+      turnScreenVisible,
+      playerTheme,
+      players,
+      currentPlayer,
+      winsStatus,
+      players[0].gameboard,
+      players[1].gameboard,
+    );
   } else {
-    displayPlayerShipsGrid(players, currentOpponent.gameboard);
+    displayPlayerShipsGrid(
+      turnScreenVisible,
+      playerTheme,
+      players,
+      currentPlayer,
+      winsStatus,
+      currentOpponent.gameboard,
+    );
   }
 }
 
@@ -115,6 +171,7 @@ function processPlayerCreation(playerData, opponentType) {
 function processShipPlacement(coords) {
   if (!placementState.activeShip) {
     console.log("There is no ship selected bro...");
+    resetHelpCreatorState();
     return;
   }
 
@@ -182,6 +239,7 @@ function playRound(coords) {
   if (checkGameboards()) {
     resetWasAttackSuccessful();
     const winner = currentPlayer;
+    playerTurn ? winsStatus.player1Wins++ : winsStatus.player2Wins++;
     console.log(`Game over, the winner is ${winner.name}`);
     const loserGameboard = playerTurn
       ? players[1].gameboard
@@ -199,6 +257,7 @@ function playRound(coords) {
     }
     showPlayerGrid();
   } else {
+    turnScreenVisible = true;
     if (currentPlayer.type === "computer") {
       console.log("Attack from computer was a miss");
       resetWasAttackSuccessful();
@@ -214,6 +273,7 @@ function playRound(coords) {
 
 function restartGame() {
   playerTurn = true;
+  turnScreenVisible = true;
   updateCurrentPlayer();
   for (const player of players) {
     player.resetGameboard();
@@ -229,6 +289,8 @@ bindOnClickAxis(updateIsHorizontalState);
 bindOnClickCreatorCell(processShipPlacement);
 binddblOnClickCreatorCell(processShipRemoval);
 bindOnConfirmFleet(processFleetConfirmation);
+bindOnClickHelpContainer(updateHelpCreatorState);
+bindOnClickTurnScreen(updateTurnScreenVisible);
 bindOnClickCell(playRound);
 bindOnRestart(restartGame);
 
