@@ -8,7 +8,6 @@ export function createPlayerForm(isPlayer2Human, formSubmitHandler) {
 
   const legend = document.createElement("legend");
   legend.className = "form-title";
-  // legend.textContent = "Create new player:";
   legend.textContent = `Create player ${isPlayer2Human ? 2 : 1}:`;
   mainFieldset.appendChild(legend);
 

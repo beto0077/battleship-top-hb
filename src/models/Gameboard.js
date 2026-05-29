@@ -42,7 +42,6 @@ export class Gameboard {
       const conditionX = 0 <= coordinate[0] && coordinate[0] < 10;
       const conditionY = 0 <= coordinate[1] && coordinate[1] < 10;
       if (!(conditionX && conditionY)) {
-        console.log("Out of limits!");
         return false;
       }
     }
@@ -52,7 +51,6 @@ export class Gameboard {
           ([x, y]) => x === coordinate[0] && y === coordinate[1],
         );
         if (spaceAlreadyTaken) {
-          console.log("This place is already taken bro...!");
           return false;
         }
       }

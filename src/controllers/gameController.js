@@ -57,7 +57,37 @@ function updatePlayerTheme() {
 function changePlayerTurn() {
   playerTurn = !playerTurn;
   updateCurrentPlayer();
-  console.log(`Turn of ${currentPlayer.name}`);
+}
+
+function updateActiveShipState(shipModel) {
+  placementState.activeShip = shipModel;
+  if (playerRequiresHelpCreator) {
+    playerRequiresHelpCreator = !playerRequiresHelpCreator;
+  }
+  showFleetPlacement();
+}
+
+function resetActiveShipState() {
+  placementState.activeShip = null;
+}
+
+function updateIsHorizontalState() {
+  placementState.isHorizontal = !placementState.isHorizontal;
+  if (currentPlayer.type === "human") {
+    showFleetPlacement();
+  }
+}
+
+function updateShipsDeployedState() {
+  placementState.shipsDeployed = currentPlayer.gameboard.getShipsDeployed();
+}
+
+function resetPlacementState() {
+  placementState = {
+    activeShip: null,
+    isHorizontal: true,
+    shipsDeployed: [],
+  };
 }
 
 function updateHelpCreatorState() {
@@ -73,40 +103,6 @@ function resetHelpCreatorState() {
 function updateTurnScreenVisible() {
   turnScreenVisible = false;
   showPlayerGrid();
-}
-
-function updateActiveShipState(shipModel) {
-  placementState.activeShip = shipModel;
-  if (playerRequiresHelpCreator) {
-    playerRequiresHelpCreator = !playerRequiresHelpCreator;
-  }
-  showFleetPlacement();
-  console.log(placementState.activeShip);
-}
-
-function resetActiveShipState() {
-  placementState.activeShip = null;
-}
-
-function updateIsHorizontalState() {
-  placementState.isHorizontal = !placementState.isHorizontal;
-  if (currentPlayer.type === "human") {
-    showFleetPlacement();
-  } else {
-    console.log(placementState.isHorizontal ? "horizontal" : "vertical");
-  }
-}
-
-function updateShipsDeployedState() {
-  placementState.shipsDeployed = currentPlayer.gameboard.getShipsDeployed();
-}
-
-function resetPlacementState() {
-  placementState = {
-    activeShip: null,
-    isHorizontal: true,
-    shipsDeployed: [],
-  };
 }
 
 function showFleetPlacement() {
@@ -125,7 +121,6 @@ function showFleetPlacement() {
 function showPlayerGrid() {
   const currentOpponent = playerTurn ? players[1] : players[0];
   updatePlayerTheme();
-  console.log(`Gameboard of ${currentOpponent.name}`);
   if (players[1].type === "computer") {
     displayPlayerShipsGrid(
       turnScreenVisible,
@@ -170,7 +165,6 @@ function processPlayerCreation(playerData, opponentType) {
 
 function processShipPlacement(coords) {
   if (!placementState.activeShip) {
-    console.log("There is no ship selected bro...");
     resetHelpCreatorState();
     return;
   }
@@ -206,16 +200,13 @@ function processShipRemoval(coords) {
 
 function processFleetConfirmation() {
   const player1Fleet = players[0].gameboard.getShipsDeployed();
-  console.log(player1Fleet);
   const player2Fleet = players[1].gameboard.getShipsDeployed();
-  console.log(player2Fleet);
   const areFleetsComplete = player1Fleet.length === player2Fleet.length;
   changePlayerTurn();
   if (areFleetsComplete) {
     showPlayerGrid();
   } else {
     if (players[1].type === "computer") {
-      console.log("Computer create its fleet here bro... amazing, right?");
       placeComputerFleet(placementState);
     } else {
       showFleetPlacement();
@@ -240,7 +231,6 @@ function playRound(coords) {
     resetWasAttackSuccessful();
     const winner = currentPlayer;
     playerTurn ? winsStatus.player1Wins++ : winsStatus.player2Wins++;
-    console.log(`Game over, the winner is ${winner.name}`);
     const loserGameboard = playerTurn
       ? players[1].gameboard
       : players[0].gameboard;
@@ -249,7 +239,6 @@ function playRound(coords) {
   }
   if (attackResult == "hit") {
     if (currentPlayer.type === "computer") {
-      console.log("Attack from computer was a hit");
       confirmAttackSuccess();
       showPlayerGrid();
       playComputerTurn();
@@ -259,13 +248,12 @@ function playRound(coords) {
   } else {
     turnScreenVisible = true;
     if (currentPlayer.type === "computer") {
-      console.log("Attack from computer was a miss");
       resetWasAttackSuccessful();
     }
     changePlayerTurn();
     if (currentPlayer.type === "computer") {
       playComputerTurn();
-      return; //test
+      return;
     }
     showPlayerGrid();
   }

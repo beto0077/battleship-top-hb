@@ -13,24 +13,7 @@ export function createShipTemplates(
   title.classList.add("ship-templates-title");
   title.textContent = `Create your fleet ${currentPlayerName}:`;
   container.appendChild(title);
-  // shipsTemplates.forEach((ship) => {
-  //   const button = document.createElement("button");
-  //   button.classList.add("btn-style", "ship-button");
-  //   button.type = "button";
-  //   button.dataset.ship = ship.type;
-  //   button.dataset.size = ship.size;
-  //   button.textContent = ship.name;
 
-  //   const alreadyDeployed = placementState.shipsDeployed.includes(ship.type);
-
-  //   if (alreadyDeployed) {
-  //     button.disabled = true;
-  //   } else {
-  //     button.addEventListener("click", clickTempHandler);
-  //   }
-
-  //   container.appendChild(button);
-  // });
   shipsTemplates.forEach((ship) => {
     const button = document.createElement("button");
     button.classList.add("btn-style", "ship-button");
@@ -78,9 +61,6 @@ export function createShipTemplates(
     const axisButton = document.createElement("button");
     axisButton.classList.add("btn-style", "axis-button");
     axisButton.type = "button";
-    // axisButton.textContent = placementState.isHorizontal
-    //   ? "Horizontal"
-    //   : "Vertical";
     axisButton.textContent = placementState.isHorizontal
       ? "Horizontal ↔"
       : "Vertical ↕";

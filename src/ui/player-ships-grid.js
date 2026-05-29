@@ -5,7 +5,6 @@ export function createPlayerShipsGrid(
 ) {
   const boardContainer = document.createElement("div");
   const gridContainer = document.createElement("div");
-  console.log(playerTheme);
   boardContainer.classList.add("grid-background", "player-glow", playerTheme);
   gridContainer.classList.add("board-grid");
 

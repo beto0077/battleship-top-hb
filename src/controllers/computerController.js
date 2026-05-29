@@ -16,7 +16,6 @@ let onConfirmComputerFleet = null;
 let onSelectedCoordsPlay = null;
 
 function handleSelectedShipTemplate(shipTemplate) {
-  console.log(shipTemplate);
   const shipModel = {
     name: shipTemplate.type,
     size: shipTemplate.size,
@@ -25,12 +24,10 @@ function handleSelectedShipTemplate(shipTemplate) {
 }
 
 function handleSelectedAxis() {
-  //placementState.isHorizontal = !placementState.isHorizontal;
   if (onSelectedAxis) onSelectedAxis();
 }
 
 function handleSelectedCoordsCreator(coords) {
-  console.log(coords);
   if (onSelectedCoordsCreator) onSelectedCoordsCreator(coords);
 }
 
@@ -39,7 +36,6 @@ function handleConfirmComputerFleet() {
 }
 
 function handleSelectedCoordsPlay(coords) {
-  console.log(coords);
   if (onSelectedCoordsPlay) onSelectedCoordsPlay(coords);
 }
 
@@ -49,6 +45,38 @@ export function confirmShipPlacement() {
 
 function resetIsShipPlaced() {
   isShipPlaced = false;
+}
+
+function generateRandomCoordinates() {
+  const coordinateX = Math.floor(Math.random() * 10);
+  const coordinateY = Math.floor(Math.random() * 10);
+  const coords = [coordinateX, coordinateY];
+
+  return coords;
+}
+
+function generateOrientation() {
+  return Math.random() < 0.5 ? "horizontal" : "vertical";
+}
+
+export function placeComputerFleet(placementState) {
+  for (const ship of SHIPS_TEMPLATES) {
+    handleSelectedShipTemplate(ship);
+
+    while (!isShipPlaced) {
+      const currentOrientation = generateOrientation();
+      const orientationIsHorizontal =
+        currentOrientation === "horizontal" ? true : false;
+
+      if (!(placementState.isHorizontal === orientationIsHorizontal)) {
+        handleSelectedAxis();
+      }
+      handleSelectedCoordsCreator(generateRandomCoordinates());
+    }
+    resetIsShipPlaced();
+  }
+  handleConfirmComputerFleet();
+  setPlayableCoordinates();
 }
 
 function generatePlayableCoordinates() {
@@ -65,7 +93,6 @@ function generatePlayableCoordinates() {
 
 function setPlayableCoordinates() {
   playableCoordinates = generatePlayableCoordinates();
-  console.log(playableCoordinates);
 }
 
 export function confirmAttackSuccess() {
@@ -78,18 +105,6 @@ export function confirmAttackSuccess() {
 
 export function resetWasAttackSuccessful() {
   wasAttackSuccessful = false;
-}
-
-function generateRandomCoordinates() {
-  const coordinateX = Math.floor(Math.random() * 10);
-  const coordinateY = Math.floor(Math.random() * 10);
-  const coords = [coordinateX, coordinateY];
-
-  return coords;
-}
-
-function generateOrientation() {
-  return Math.random() < 0.5 ? "horizontal" : "vertical";
 }
 
 function extractCoordinate(targetCoord) {
@@ -173,42 +188,9 @@ function setAttackCoordinates() {
   attackState.currentCoordinates = generateAttackCoordinates();
 }
 
-export function placeComputerFleet(placementState) {
-  for (const ship of SHIPS_TEMPLATES) {
-    console.log(ship.name);
-    handleSelectedShipTemplate(ship);
-    // const orientationIsHorizontal =
-    //   generateOrientation() === "horizontal" ? true : false;
-    while (!isShipPlaced) {
-      const currentOrientation = generateOrientation();
-      const orientationIsHorizontal =
-        currentOrientation === "horizontal" ? true : false;
-
-      if (!(placementState.isHorizontal === orientationIsHorizontal)) {
-        console.log(
-          `${placementState.isHorizontal ? "horizontal" : "vertical"} => ${currentOrientation}`,
-        );
-        handleSelectedAxis();
-      }
-      handleSelectedCoordsCreator(generateRandomCoordinates());
-    }
-    resetIsShipPlaced();
-  }
-  handleConfirmComputerFleet();
-  setPlayableCoordinates();
-}
-
 export function playComputerTurn() {
   do {
-    console.log("It's my turn MF!!");
-    //const attackCoordinates = generateAttackCoordinates();
     setAttackCoordinates();
-    // console.log(attackCoordinates);
-    // const otherCoords = generateRandomCoordinates();
-    // console.log(otherCoords);
-    // if (wasAttackSuccessful) {
-    //   attackState.lastSuccessfulCoordinates = attackCoordinates;
-    // }
     handleSelectedCoordsPlay(attackState.currentCoordinates);
   } while (wasAttackSuccessful);
 }
@@ -231,9 +213,4 @@ export function bindOnConfirmComputerFleet(callback) {
 
 export function bindOnSelectedCoordsPlay(callback) {
   onSelectedCoordsPlay = callback;
-}
-
-//tempora function REMOVE LATER
-export function testComputerController() {
-  //placeComputerFleet(placementState);
 }
